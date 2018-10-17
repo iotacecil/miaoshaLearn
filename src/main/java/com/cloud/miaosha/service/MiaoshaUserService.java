@@ -1,16 +1,15 @@
 package com.cloud.miaosha.service;
 
+import com.cloud.miaosha.controller.LoginController;
 import com.cloud.miaosha.dao.MiaoshaUserDao;
 import com.cloud.miaosha.domain.MiaoshaUser;
-//import com.cloud.miaosha.exception.GlobalException;
-//import com.cloud.miaosha.redis.MiaoshaUserKey;
-//import com.cloud.miaosha.redis.RedisService;
-//import com.cloud.miaosha.redis.tokenKey;
-//import com.cloud.miaosha.result.CodeMsg;
-//import com.cloud.miaosha.util.MD5Util;
-//import com.cloud.miaosha.util.UUIDUtil;
-//import com.cloud.miaosha.vo.LoginVo;
-//import org.apache.commons.lang3.StringUtils;
+
+
+import com.cloud.miaosha.result.CodeMsg;
+import com.cloud.miaosha.util.MD5Util;
+import com.cloud.miaosha.vo.LoginVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +20,7 @@ import javax.validation.Valid;
 @Service
 public class MiaoshaUserService {
 
+	private static Logger log = LoggerFactory.getLogger(MiaoshaUserService.class);
 
 	public static final String COOKI_NAME_TOKEN = "token";
 
@@ -34,7 +34,30 @@ public class MiaoshaUserService {
 		return miaoshaUserDao.getById(id);
 	}
 
+	public CodeMsg login(LoginVo loginVo){
+		if(loginVo == null){
+			return CodeMsg.SERVER_ERROR;
+		}
+		String mobile = loginVo.getMobile();
+		String formPass = loginVo.getPassword();
+		MiaoshaUser user = getById(Long.parseLong(mobile));
+		if(user == null) {
+			//用户/手机号不存在
 
+			return CodeMsg.MOBILE_NOT_EXIST;
+		}
+		//数据库中的密码,salt
+		String dbPass = user.getPassword();
+		String saltDB = user.getSalt();
+//		用前端密码+数据库salt是否等于数据库密码
+		String calcPass = MD5Util.formPassToDBPass(formPass, saltDB);
+		log.info(calcPass);
+		log.info(dbPass);
+		if(!calcPass.equals(dbPass)) {
+			return CodeMsg.PASSWORD_ERROR;
+		}
+		return CodeMsg.SUCCESS;
+	}
 //	public MiaoshaUser getByToken(HttpServletResponse response, String token) {
 //		if(StringUtils.isEmpty(token)) {
 //			return null;

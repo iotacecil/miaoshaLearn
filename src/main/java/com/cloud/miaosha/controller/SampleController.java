@@ -3,6 +3,8 @@ package com.cloud.miaosha.controller;
 import com.cloud.miaosha.domain.User;
 //import com.cloud.miaosha.redis.RedisService;
 //import com.cloud.miaosha.redis.UserKey;
+import com.cloud.miaosha.redis.RedisService;
+import com.cloud.miaosha.redis.UserKey;
 import com.cloud.miaosha.result.CodeMsg;
 import com.cloud.miaosha.result.Result;
 import com.cloud.miaosha.service.UserService;
@@ -19,8 +21,8 @@ public class SampleController {
 	@Autowired
 	UserService userService;
 	
-//	@Autowired
-//	RedisService redisService;
+	@Autowired
+    RedisService redisService;
 	
 
     
@@ -47,26 +49,26 @@ public class SampleController {
         return Result.success(true);
     }
     
-//    @RequestMapping("/redis/get")
-//    @ResponseBody
-//    public Result<User> redisGet() {
-////        Long v1 = redisService.get("key1",Long.class);
-////        String name = redisService.get("key2",String.class);
-//    	User  user  = redisService.get(UserKey.getById, "1", User.class);
-//        return Result.success(user);
-////        return Result.success(name);
-//    }
-//
-//    @RequestMapping("/redis/set")
-//    @ResponseBody
-//    public Result<Boolean> redisSet() {
-//    	User user  = new User();
-//    	user.setId(1);
-//    	user.setName("1111");
-//    	redisService.set(UserKey.getById,"1",user);//UserKey:id1
-//
-//        return Result.success(true);
-//    }
-//
+    @RequestMapping("/redis/get")
+    @ResponseBody
+    public Result<User> redisGet() {
+//        Long v1 = redisService.get("key1",Long.class);
+//        String name = redisService.get("key2",String.class);
+    	User  user  = redisService.get(UserKey.getById, "1", User.class);
+        return Result.success(user);
+//        return Result.success(name);
+    }
+
+    @RequestMapping("/redis/set")
+    @ResponseBody
+    public Result<Boolean> redisSet() {
+    	User user  = new User();
+    	user.setId(1);
+    	user.setName("1111");
+    	redisService.set(UserKey.getById,"1",user);//UserKey:id1
+
+        return Result.success(true);
+    }
+
 //
 }
