@@ -1,6 +1,7 @@
 package com.cloud.miaosha.vo;
 
 //import com.cloud.miaosha.validator.Mobile;
+import com.cloud.miaosha.validator.Mobile;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
@@ -8,7 +9,7 @@ import javax.validation.constraints.NotNull;
 public class LoginVo {
 	
 	@NotNull
-//	@Mobile(required = true,message = "手机号错")
+	@Mobile(required = true,message = "手机号错")
 	private String mobile;
 	
 	@NotNull

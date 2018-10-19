@@ -91,6 +91,7 @@ function doLogin(){
 	    		console.log(data)
 	    		window.location.href="/goods/to_list";
 	    	}else{
+	    	    console.log("成功了，但是后端返回的code！=0")
 	    		layer.msg(data.msg);
 	    	}
 	    },

@@ -5,12 +5,17 @@ import com.cloud.miaosha.dao.MiaoshaUserDao;
 import com.cloud.miaosha.domain.MiaoshaUser;
 
 
+import com.cloud.miaosha.exception.GlobalException;
+import com.cloud.miaosha.redis.MiaoshaUserKey;
+import com.cloud.miaosha.redis.RedisService;
 import com.cloud.miaosha.result.CodeMsg;
 import com.cloud.miaosha.util.MD5Util;
+import com.cloud.miaosha.util.UUIDUtil;
 import com.cloud.miaosha.vo.LoginVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.Cookie;
@@ -27,16 +32,16 @@ public class MiaoshaUserService {
 	@Autowired
 	MiaoshaUserDao miaoshaUserDao;
 
-//	@Autowired
-//	RedisService redisService;
+	@Autowired
+	RedisService redisService;
 //
 	public MiaoshaUser getById(long id) {
 		return miaoshaUserDao.getById(id);
 	}
 
-	public CodeMsg login(LoginVo loginVo){
+	public boolean login(LoginVo loginVo){
 		if(loginVo == null){
-			return CodeMsg.SERVER_ERROR;
+			throw new GlobalException( CodeMsg.SERVER_ERROR);
 		}
 		String mobile = loginVo.getMobile();
 		String formPass = loginVo.getPassword();
@@ -44,7 +49,7 @@ public class MiaoshaUserService {
 		if(user == null) {
 			//用户/手机号不存在
 
-			return CodeMsg.MOBILE_NOT_EXIST;
+			throw new GlobalException( CodeMsg.MOBILE_NOT_EXIST);
 		}
 		//数据库中的密码,salt
 		String dbPass = user.getPassword();
@@ -54,9 +59,15 @@ public class MiaoshaUserService {
 		log.info(calcPass);
 		log.info(dbPass);
 		if(!calcPass.equals(dbPass)) {
-			return CodeMsg.PASSWORD_ERROR;
+			throw new GlobalException( CodeMsg.PASSWORD_ERROR);
 		}
-		return CodeMsg.SUCCESS;
+
+		// 生成cookie
+		String token = UUIDUtil.uuid();
+		redisService.set(MiaoshaUserKey.token, token, user);
+		Cookie cookie = new Cookie(COOKI_NAME_TOKEN,token);
+		cookie.setMaxAge(MiaoshaUserKey.token.expireSeconds());
+		return true;
 	}
 //	public MiaoshaUser getByToken(HttpServletResponse response, String token) {
 //		if(StringUtils.isEmpty(token)) {

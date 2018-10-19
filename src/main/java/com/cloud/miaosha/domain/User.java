@@ -1,6 +1,6 @@
 package com.cloud.miaosha.domain;
 
-public class User {
+public class  User {
 	private int id;
 	private String name;
 	public int getId() {
