@@ -40,12 +40,13 @@ public class LoginController {
     public Result<String> doLogin(HttpServletResponse response,@Valid  LoginVo loginVo) {
     	log.info(loginVo.toString());
 //        登录
-        userService.login(loginVo);
+        userService.login(response,loginVo);
 //        if(cm.getCode() == 0)
 //            return Result.success("登录成功");
 //        else
 //            return Result.error(cm);
-//    	userService.login(response, loginVo);
+        System.out.println("登陆成功");
+
     	return Result.success("登录成功");
 
     }

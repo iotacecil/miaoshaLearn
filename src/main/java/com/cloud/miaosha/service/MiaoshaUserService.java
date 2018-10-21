@@ -12,6 +12,7 @@ import com.cloud.miaosha.result.CodeMsg;
 import com.cloud.miaosha.util.MD5Util;
 import com.cloud.miaosha.util.UUIDUtil;
 import com.cloud.miaosha.vo.LoginVo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class MiaoshaUserService {
 		return miaoshaUserDao.getById(id);
 	}
 
-	public boolean login(LoginVo loginVo){
+	public boolean login(HttpServletResponse response,LoginVo loginVo){
 		if(loginVo == null){
 			throw new GlobalException( CodeMsg.SERVER_ERROR);
 		}
@@ -61,25 +62,25 @@ public class MiaoshaUserService {
 		if(!calcPass.equals(dbPass)) {
 			throw new GlobalException( CodeMsg.PASSWORD_ERROR);
 		}
-
-		// 生成cookie
 		String token = UUIDUtil.uuid();
-		redisService.set(MiaoshaUserKey.token, token, user);
-		Cookie cookie = new Cookie(COOKI_NAME_TOKEN,token);
-		cookie.setMaxAge(MiaoshaUserKey.token.expireSeconds());
+		//生成cookie
+		addCookie(response,token , user);
 		return true;
 	}
-//	public MiaoshaUser getByToken(HttpServletResponse response, String token) {
-//		if(StringUtils.isEmpty(token)) {
-//			return null;
-//		}
-//		MiaoshaUser user = redisService.get(MiaoshaUserKey.token, token, MiaoshaUser.class);
-//		//延长有效期
-////		if(user != null) {
-////			addCookie(response, token, user);
-////		}
-//		return user;
-//	}
+	public MiaoshaUser getByToken(HttpServletResponse response, String token) {
+
+		if(StringUtils.isEmpty(token)) {
+			return null;
+		}
+		MiaoshaUser user = redisService.get(MiaoshaUserKey.token, token, MiaoshaUser.class);
+//		延长有效期
+
+		if(user != null) {
+
+			addCookie(response, token,user);
+		}
+		return user;
+	}
 //
 //
 //	public boolean login( HttpServletResponse response,@Valid LoginVo loginVo) {
@@ -139,12 +140,14 @@ public class MiaoshaUserService {
 //		return true;
 //	}
 
-//	private void addCookie(HttpServletResponse response, String token, MiaoshaUser user) {
-//		redisService.set(MiaoshaUserKey.token, token, user);
-//		Cookie cookie = new Cookie(COOKI_NAME_TOKEN, token);
-//		cookie.setMaxAge(MiaoshaUserKey.token.expireSeconds());
-//		cookie.setPath("/");
-//		response.addCookie(cookie);
-//	}
+	private void addCookie(HttpServletResponse response,String token, MiaoshaUser user) {
+
+
+		redisService.set(MiaoshaUserKey.token, token, user);
+		Cookie cookie = new Cookie(COOKI_NAME_TOKEN, token);
+		cookie.setMaxAge(MiaoshaUserKey.token.expireSeconds());
+		cookie.setPath("/");
+		response.addCookie(cookie);
+	}
 
 }
