@@ -8,7 +8,7 @@ import com.cloud.miaosha.result.CodeMsg;
 import com.cloud.miaosha.service.GoodsService;
 import com.cloud.miaosha.service.MiaoshaService;
 import com.cloud.miaosha.service.MiaoshaUserService;
-//import com.cloud.miaosha.service.OrderService;
+import com.cloud.miaosha.service.OrderService;
 import com.cloud.miaosha.vo.GoodVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,16 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class MiaoshaController {
 
 	@Autowired
-	MiaoshaUserService userService;
-	
-	@Autowired
-	RedisService redisService;
-	
-	@Autowired
 	GoodsService goodsService;
 	
-//	@Autowired
-//	OrderService orderService;
+	@Autowired
+	OrderService orderService;
 	
 	@Autowired
 	MiaoshaService miaoshaService;
@@ -39,26 +33,27 @@ public class MiaoshaController {
     public String list(Model model, MiaoshaUser user,
                        @RequestParam("goodsId")long goodsId) {
     	model.addAttribute("user", user);
+    	// 没登陆
     	if(user == null) {
     		return "login";
     	}
     	//判断库存
     	GoodVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
     	int stock = goods.getStockCount();
-//    	if(stock <= 0) {
-//    		model.addAttribute("errmsg", CodeMsg.MIAO_SHA_OVER.getMsg());
-//    		return "miaosha_fail";
-//    	}
-    	//判断是否已经秒杀到了
-//    	MiaoshaOrder order = orderService.getMiaoshaOrderByUserIdGoodsId(user.getId(), goodsId);
-//    	if(order != null) {
-//    		model.addAttribute("errmsg", CodeMsg.REPEATE_MIAOSHA.getMsg());
-//    		return "miaosha_fail";
-//    	}
-//    	//减库存 下订单 写入秒杀订单
-//    	OrderInfo orderInfo = miaoshaService.miaosha(user, goods);
-//    	model.addAttribute("orderInfo", orderInfo);
-//    	model.addAttribute("goods", goods);
+    	if(stock <= 0) {
+    		model.addAttribute("errmsg", CodeMsg.MIAO_SHA_OVER.getMsg());
+    		return "miaosha_fail";
+    	}
+//    	从用户订单查询是否已经对这个物品下过单了
+    	MiaoshaOrder order = orderService.getMiaoshaOrderByUserIdGoodsId(user.getId(), goodsId);
+    	if(order != null) {
+    		model.addAttribute("errmsg", CodeMsg.REPEATE_MIAOSHA.getMsg());
+    		return "miaosha_fail";
+    	}
+    	//1.减库存 2.下订单 3.写入秒杀订单 这三步是一个是事务
+    	OrderInfo orderInfo = miaoshaService.miaosha(user, goods);
+    	model.addAttribute("orderInfo", orderInfo);
+    	model.addAttribute("goods", goods);
         return "order_detail";
     }
 }

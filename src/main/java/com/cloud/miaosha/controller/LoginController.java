@@ -1,12 +1,8 @@
 package com.cloud.miaosha.controller;
 
-import com.alibaba.druid.util.StringUtils;
 import com.cloud.miaosha.redis.RedisService;
-import com.cloud.miaosha.result.CodeMsg;
 import com.cloud.miaosha.result.Result;
 import com.cloud.miaosha.service.MiaoshaUserService;
-
-import com.cloud.miaosha.util.ValidatorUtil;
 import com.cloud.miaosha.vo.LoginVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,14 +36,9 @@ public class LoginController {
     public Result<String> doLogin(HttpServletResponse response,@Valid  LoginVo loginVo) {
     	log.info(loginVo.toString());
 //        登录
-        userService.login(response,loginVo);
-//        if(cm.getCode() == 0)
-//            return Result.success("登录成功");
-//        else
-//            return Result.error(cm);
+        String token = userService.login(response, loginVo);
         System.out.println("登陆成功");
-
-    	return Result.success("登录成功");
+    	return Result.success(token);
 
     }
 //    @RequestMapping("/do_login")

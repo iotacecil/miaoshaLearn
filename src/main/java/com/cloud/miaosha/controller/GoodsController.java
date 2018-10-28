@@ -2,22 +2,17 @@ package com.cloud.miaosha.controller;
 
 import com.cloud.miaosha.domain.MiaoshaUser;
 import com.cloud.miaosha.redis.RedisService;
-import com.cloud.miaosha.result.Result;
 import com.cloud.miaosha.service.GoodsService;
 import com.cloud.miaosha.service.MiaoshaUserService;
 import com.cloud.miaosha.vo.GoodVo;
-import com.cloud.miaosha.vo.LoginVo;
-import com.sun.deploy.net.HttpResponse;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.util.List;
 
 @Controller

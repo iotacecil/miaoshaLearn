@@ -1,10 +1,7 @@
 package com.cloud.miaosha.service;
 
-import com.cloud.miaosha.controller.LoginController;
 import com.cloud.miaosha.dao.MiaoshaUserDao;
 import com.cloud.miaosha.domain.MiaoshaUser;
-
-
 import com.cloud.miaosha.exception.GlobalException;
 import com.cloud.miaosha.redis.MiaoshaUserKey;
 import com.cloud.miaosha.redis.RedisService;
@@ -16,12 +13,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 @Service
 public class MiaoshaUserService {
@@ -40,7 +35,7 @@ public class MiaoshaUserService {
 		return miaoshaUserDao.getById(id);
 	}
 
-	public boolean login(HttpServletResponse response,LoginVo loginVo){
+	public String login(HttpServletResponse response,LoginVo loginVo){
 		if(loginVo == null){
 			throw new GlobalException( CodeMsg.SERVER_ERROR);
 		}
@@ -65,7 +60,7 @@ public class MiaoshaUserService {
 		String token = UUIDUtil.uuid();
 		//生成cookie
 		addCookie(response,token , user);
-		return true;
+		return token;
 	}
 	public MiaoshaUser getByToken(HttpServletResponse response, String token) {
 
