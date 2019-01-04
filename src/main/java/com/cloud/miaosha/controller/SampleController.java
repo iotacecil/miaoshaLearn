@@ -1,18 +1,18 @@
 package com.cloud.miaosha.controller;
 
 import com.cloud.miaosha.domain.User;
-//import com.cloud.miaosha.redis.RedisService;
-//import com.cloud.miaosha.redis.UserKey;
+import com.cloud.miaosha.rabbitmq.MQSender;
 import com.cloud.miaosha.redis.RedisService;
 import com.cloud.miaosha.redis.UserKey;
-import com.cloud.miaosha.result.CodeMsg;
 import com.cloud.miaosha.result.Result;
 import com.cloud.miaosha.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+//import com.cloud.miaosha.redis.RedisService;
+//import com.cloud.miaosha.redis.UserKey;
 
 @Controller
 @RequestMapping("/demo")
@@ -23,7 +23,25 @@ public class SampleController {
 	
 	@Autowired
     RedisService redisService;
-	
+
+	@Autowired
+	MQSender sender;
+
+	@RequestMapping("/mq")
+    @ResponseBody
+    public Result<String> mq(){
+	    sender.send("rabbitMQ消息测试");
+	    return Result.success("rabbitMQ消息测试");
+
+    }
+
+    @RequestMapping("/mq/topic")
+    @ResponseBody
+    public Result<String> topic(){
+	    // 发两条消息
+        sender.sendTopic("topic消息测试");
+        return Result.success("topic消息测试");
+    }
 
     
 //    @RequestMapping("/error")

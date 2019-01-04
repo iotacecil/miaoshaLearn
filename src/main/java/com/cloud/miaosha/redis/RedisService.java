@@ -12,7 +12,7 @@ public class RedisService{
 
 	JedisPool jedisPool;
 	@SuppressWarnings("unchecked")//屏蔽警告
-	private <T> T stringToBean(String str,Class<T> clazz){
+	public static <T> T stringToBean(String str,Class<T> clazz){
 		//1. 参数校验
 		if(str == null || str.length() <= 0 || clazz == null) {
 			return null;
@@ -28,7 +28,6 @@ public class RedisService{
 			//fastJson 其他List类型要再写
 			return JSON.toJavaObject(JSON.parseObject(str), clazz);
 		}
-
 	}
 	public <T> boolean set(KeyPrefix prefix,String key,T value){
 		Jedis jedis = null;
@@ -53,7 +52,7 @@ public class RedisService{
 	}
 //任意类型转化成字符串
 
-	private <T> String beanToString(T value){
+	public static  <T> String beanToString(T value){
 		//2. 添加空判断
 		if(value == null)return null;
 		//3. 如果是数字，字符串，Long
@@ -67,7 +66,6 @@ public class RedisService{
 		}else {
 			return JSON.toJSONString(value);
 		}
-
 	}
 	public<T> T get(KeyPrefix prefix,String key,Class<T> clazz){
 		Jedis jedis = null;
@@ -123,6 +121,19 @@ public class RedisService{
 		 }finally {
 			  returnToPool(jedis);
 		 }
+	}
+
+	public boolean delete(KeyPrefix prefix, String key) {
+		Jedis jedis = null;
+		try {
+			jedis =  jedisPool.getResource();
+			//生成真正的key
+			String realKey  = prefix.getPrefix() + key;
+			long ret =  jedis.del(realKey);
+			return ret > 0;
+		}finally {
+			returnToPool(jedis);
+		}
 	}
 
 }

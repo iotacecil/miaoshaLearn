@@ -10,4 +10,6 @@ public class MiaoshaUserKey extends BasePrefix{
 	}
 	// 调用构造函数
 	public static MiaoshaUserKey token = new MiaoshaUserKey(TOKEN_EXPIRE,"tk");
+	public static MiaoshaUserKey getById = new MiaoshaUserKey(0, "id");
+
 }
