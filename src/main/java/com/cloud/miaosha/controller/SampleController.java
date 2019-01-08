@@ -42,7 +42,19 @@ public class SampleController {
         sender.sendTopic("topic消息测试");
         return Result.success("topic消息测试");
     }
+    @RequestMapping("/mq/fanout")
+    @ResponseBody
+    public Result<String> fanout(){
+        sender.sendFanout("广播 消息测试");
+        return Result.success("广播消息测试");
+    }
 
+    @RequestMapping("/mq/header")
+    @ResponseBody
+    public Result<String> header(){
+        sender.sendHeader("header 消息测试");
+        return Result.success("header消息测试");
+    }
     
 //    @RequestMapping("/error")
 //    @ResponseBody

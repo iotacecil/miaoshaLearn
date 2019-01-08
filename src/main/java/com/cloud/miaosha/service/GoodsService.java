@@ -1,7 +1,6 @@
 package com.cloud.miaosha.service;
 
 import com.cloud.miaosha.dao.GoodsDao;
-import com.cloud.miaosha.domain.Goods;
 import com.cloud.miaosha.domain.MiaoshaGoods;
 import com.cloud.miaosha.vo.GoodVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +23,11 @@ public class GoodsService {
         return goodsDao.getGoodsVoByGoodsId(goodsId);
     }
     // 减库存
-    public void reduceStock(GoodVo goods) {
+    public boolean reduceStock(GoodVo goods) {
         MiaoshaGoods g = new MiaoshaGoods();
-        g.setId(goods.getId());
-        goodsDao.reduceStock(g);
+        g.setGooddsId(goods.getId());
+        int rst = goodsDao.reduceStock(g);
+        System.out.println("dao层减少库存"+rst);
+        return rst > 0;
     }
 }

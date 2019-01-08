@@ -46,11 +46,11 @@ public class OrderService {
 		orderInfo.setOrderChannel(1);
 		orderInfo.setStatus(0);
 		orderInfo.setUserId(user.getId());
-		// 数据库insert order表
-		long orderId = orderDao.insert(orderInfo);
+		// 数据库insert order表 mybatis成功之后会把id加到对象中
+		orderDao.insert(orderInfo);
 		MiaoshaOrder miaoshaOrder = new MiaoshaOrder();
 		miaoshaOrder.setGoodsId(goods.getId());
-		miaoshaOrder.setOrderId(orderId);
+		miaoshaOrder.setOrderId(orderInfo.getId());
 		miaoshaOrder.setUserId(user.getId());
 		// 数据库 miaoshaOrder表
 		orderDao.insertMiaoshaOrder(miaoshaOrder);
