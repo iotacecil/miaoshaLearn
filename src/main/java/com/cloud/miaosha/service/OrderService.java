@@ -11,14 +11,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Types;
 import java.util.Date;
 
 @Service
 public class OrderService {
-	
+
+	public void deleteOrders() {
+		orderDao.deleteOrders();
+		orderDao.deleteMiaoshaOrders();
+	}
+
 	@Autowired
 	OrderDao orderDao;
 
+
+	public boolean insertnull(){
+		MiaoshaOrder obj = new MiaoshaOrder();
+		obj.setUserId(1111l);
+		if(obj.getTestNull() == null){
+			obj.setTestNull(Types.INTEGER);
+			obj.setTestNull(Types.INTEGER);
+		}
+		return orderDao.insertMiaoshaOrder(obj) > 0;
+
+	}
 
 	@Autowired
 	RedisService redisService;

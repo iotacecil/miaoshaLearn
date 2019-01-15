@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class MiaoshaService {
     @Autowired
@@ -20,6 +22,11 @@ public class MiaoshaService {
 
     @Autowired
     RedisService redisService;
+
+    public void reset(List<GoodVo> goodsList) {
+        goodsService.resetStock(goodsList);
+        orderService.deleteOrders();
+    }
 
     /**
      * 输入用户和商品 返回订单

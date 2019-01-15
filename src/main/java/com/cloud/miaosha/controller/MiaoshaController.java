@@ -5,6 +5,8 @@ import com.cloud.miaosha.domain.MiaoshaUser;
 import com.cloud.miaosha.rabbitmq.MiaoshaMessage;
 import com.cloud.miaosha.rabbitmq.MiaoshaSender;
 import com.cloud.miaosha.redis.GoodsKey;
+import com.cloud.miaosha.redis.MiaoshaKey;
+import com.cloud.miaosha.redis.OrderKey;
 import com.cloud.miaosha.redis.RedisService;
 import com.cloud.miaosha.result.CodeMsg;
 import com.cloud.miaosha.result.Result;
@@ -41,7 +43,35 @@ public class MiaoshaController implements InitializingBean{
 	@Autowired
 	MiaoshaSender sender;
 
+	// 结束标记
 	private Map<Long,Boolean> localOverMap = new HashMap<Long, Boolean>();
+
+	// 系统初始化 读数据库库存，写到redis
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		List<GoodVo> goodslist = goodsService.listGoodsVo();
+		if(goodslist!=null){
+			for(GoodVo goods : goodslist){
+				redisService.set(GoodsKey.getMiaoshaGoodsStock,""+goods.getId() ,goods.getStockCount() );
+				localOverMap.put(goods.getId(),  false);
+			}
+		}
+	}
+
+	@RequestMapping(value="/reset", method=RequestMethod.GET)
+	@ResponseBody
+	public Result<Boolean> reset(Model model) {
+		List<GoodVo> goodsList = goodsService.listGoodsVo();
+		for(GoodVo goods : goodsList) {
+			goods.setStockCount(10);
+			redisService.set(GoodsKey.getMiaoshaGoodsStock, ""+goods.getId(), 10);
+			localOverMap.put(goods.getId(), false);
+		}
+		redisService.delete(OrderKey.getMiaoshaOrderByUidGid);
+		redisService.delete(MiaoshaKey.isGoodsOver);
+		miaoshaService.reset(goodsList);
+		return Result.success(true);
+	}
 
 	@Autowired
 	MiaoshaService miaoshaService;
@@ -53,9 +83,17 @@ public class MiaoshaController implements InitializingBean{
 		if(user == null) {
 			return Result.error(CodeMsg.SESSION_ERROR);
 		}
+
+		// 判断商品结束标记
+		Boolean over = localOverMap.get(goodsId);
+		if(over){
+			return Result.error(CodeMsg.MIAO_SHA_OVER);
+		}
+
 		// redis中预减库存
 		Long stock = redisService.decr(GoodsKey.getMiaoshaGoodsStock, "" + goodsId);
 		if(stock < 0){
+			localOverMap.put(goodsId, true);
 			return Result.error(CodeMsg.MIAO_SHA_OVER);
 		}
 //    	从用户订单查询是否已经对这个物品下过单了
@@ -71,16 +109,7 @@ public class MiaoshaController implements InitializingBean{
 		return Result.success(0);
 	}
 
-	// 系统初始化 读数据库库存，写到redis
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		List<GoodVo> goodslist = goodsService.listGoodsVo();
-		if(goodslist!=null){
-			for(GoodVo goods : goodslist){
-				redisService.set(GoodsKey.getMiaoshaGoodsStock,""+goods.getId() ,goods.getStockCount() );
-			}
-		}
-	}
+
 
 	// 客户端轮询接口 判断是否秒杀到
 	/*

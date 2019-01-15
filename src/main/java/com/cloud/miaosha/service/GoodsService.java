@@ -30,4 +30,14 @@ public class GoodsService {
         System.out.println("dao层减少库存"+rst);
         return rst > 0;
     }
+
+
+    public void resetStock(List<GoodVo> goodsList) {
+        for(GoodVo goods : goodsList ) {
+            MiaoshaGoods g = new MiaoshaGoods();
+            g.setGooddsId(goods.getId());
+            g.setStockCount(goods.getStockCount());
+            goodsDao.resetStock(g);
+        }
+    }
 }

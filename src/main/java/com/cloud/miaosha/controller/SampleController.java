@@ -5,6 +5,7 @@ import com.cloud.miaosha.rabbitmq.MQSender;
 import com.cloud.miaosha.redis.RedisService;
 import com.cloud.miaosha.redis.UserKey;
 import com.cloud.miaosha.result.Result;
+import com.cloud.miaosha.service.OrderService;
 import com.cloud.miaosha.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,8 +25,19 @@ public class SampleController {
 	@Autowired
     RedisService redisService;
 
+    @Autowired
+    OrderService orderService;
+
 	@Autowired
 	MQSender sender;
+
+    @RequestMapping("/dbnull")
+    @ResponseBody
+    public Result<Boolean> insertnull(){
+        boolean insertnull = orderService.insertnull();
+        return Result.success(insertnull);
+
+    }
 
 	@RequestMapping("/mq")
     @ResponseBody

@@ -6,6 +6,16 @@ public class MiaoshaOrder {
     private Long orderId;
     private Long goodsId;
 
+    public Integer getTestNull() {
+        return testNull;
+    }
+
+    public void setTestNull(Integer testNull) {
+        this.testNull = testNull;
+    }
+
+    private Integer testNull;
+
     public Long getId() {
         return id;
     }

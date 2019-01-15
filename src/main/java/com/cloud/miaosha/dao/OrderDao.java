@@ -18,7 +18,16 @@ public interface OrderDao {
 	@Insert("insert into miaosha_order (user_id, goods_id, order_id)values(#{userId}, #{goodsId}, #{orderId})")
 	public int insertMiaoshaOrder(MiaoshaOrder miaoshaOrder);
 
+	@Insert("insert into miaosha_order (user_id, testnull)values(#{userId}, #{testNull})")
+	public int insertNullTest(MiaoshaOrder miaoshaOrder);
+
 	@Select("select * from order_info where id = #{orderId}")
 	public OrderInfo getOrderById(@Param("orderId")long orderId);
+
+	@Delete("delete from order_info")
+	public void deleteOrders();
+
+	@Delete("delete from miaosha_order")
+	public void deleteMiaoshaOrders();
 
 }
