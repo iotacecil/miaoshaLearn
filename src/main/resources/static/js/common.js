@@ -1,7 +1,7 @@
 //展示loading
 function g_showLoading(){
 	var idx = layer.msg('处理中...', {icon: 16,shade: [0.5, '#f5f5f5'],scrollbar: false,offset: '0px', time:100000}) ;
-	alert("弹个窗")
+	// alert("弹个窗")
 	return idx;
 }
 //salt

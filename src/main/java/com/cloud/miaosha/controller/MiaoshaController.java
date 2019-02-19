@@ -1,13 +1,11 @@
 package com.cloud.miaosha.controller;
 
+import com.cloud.miaosha.access.AccessLimit;
 import com.cloud.miaosha.domain.MiaoshaOrder;
 import com.cloud.miaosha.domain.MiaoshaUser;
 import com.cloud.miaosha.rabbitmq.MiaoshaMessage;
 import com.cloud.miaosha.rabbitmq.MiaoshaSender;
-import com.cloud.miaosha.redis.GoodsKey;
-import com.cloud.miaosha.redis.MiaoshaKey;
-import com.cloud.miaosha.redis.OrderKey;
-import com.cloud.miaosha.redis.RedisService;
+import com.cloud.miaosha.redis.*;
 import com.cloud.miaosha.result.CodeMsg;
 import com.cloud.miaosha.result.Result;
 import com.cloud.miaosha.service.GoodsService;
@@ -18,11 +16,13 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,13 +75,22 @@ public class MiaoshaController implements InitializingBean{
 
 	@Autowired
 	MiaoshaService miaoshaService;
-	@RequestMapping(value = "/do_miaosha",method = RequestMethod.POST)
+	@RequestMapping(value = "/{path}/do_miaosha",method = RequestMethod.POST)
 	@ResponseBody
 	public Result<Integer> list(MiaoshaUser user,
-					   @RequestParam("goodsId")long goodsId) {
+								@RequestParam("goodsId")long goodsId,
+								@PathVariable("path")String path) {
 		// 没登陆
 		if(user == null) {
 			return Result.error(CodeMsg.SESSION_ERROR);
+		}
+
+		//验证path
+		System.out.println(path);
+		boolean check = miaoshaService.checkPath(user,goodsId,path);
+		System.out.println(check);
+		if(!check){
+			return Result.error(CodeMsg.REQUEST_ILLEGAL);
 		}
 
 		// 判断商品结束标记
@@ -127,6 +136,63 @@ public class MiaoshaController implements InitializingBean{
 		long rst = miaoshaService.getMiaoshaResult(user.getId(),goodsId);
 		return Result.success(rst);
 	}
+
+	@AccessLimit(seconds = 5,maxCount = 5,needLogin = true)
+	@RequestMapping(value = "/path",method = RequestMethod.GET)
+	@ResponseBody
+	public Result<String> getMiaoShaPath(HttpServletRequest request,MiaoshaUser user,
+										 @RequestParam("goodsId")long goodsId,
+										 @RequestParam(value = "verifyCode",required = false)int verify){
+		if(user == null){
+			return Result.error(CodeMsg.SESSION_ERROR);
+		}
+
+//		String uri = request.getRequestURI();
+//		System.out.println("uri"+uri);
+//		System.out.println("url"+request.getRequestURL());
+//		//限流
+//
+//		String acKey = uri + "_" + user.getId();
+//		Integer count = redisService.get(AccessKey.withExpire(5), acKey, Integer.class);
+//		if(count == null){
+//			redisService.set(AccessKey.withExpire(5), acKey, 1);
+//		}else if(count < 5){
+//			redisService.incr(AccessKey.withExpire(5), acKey);
+//		}else{
+//			return Result.error(CodeMsg.ACCESS_LIMIT_REACHED);
+//		}
+		// 验证码
+		boolean check = miaoshaService.checkVerifyCode(user,goodsId,verify);
+		if(!check){
+			return Result.error(CodeMsg.REQUEST_ILLEGAL);
+		}
+		String path =  miaoshaService.createMiaoshaPath(user,goodsId);
+		return Result.success(path);
+	}
+
+	@RequestMapping(value = "/verifyCode",method = RequestMethod.GET)
+	@ResponseBody
+	public Result<String> getVerifyCode(HttpServletResponse response,
+										MiaoshaUser user,
+										@RequestParam("goodsId")long goodsId){
+
+		if(user == null){
+			return Result.error(CodeMsg.SESSION_ERROR);
+		}
+		BufferedImage image = miaoshaService.createVerifyCode(user,goodsId);
+		try{
+			OutputStream out = response.getOutputStream();
+			ImageIO.write(image, "JPEG", out);
+			out.flush();
+			out.close();
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Result.error(CodeMsg.SESSION_ERROR);
+		}
+	}
+
+
 
 //    @RequestMapping("/do_miaosha")
 //    public String list(Model model, MiaoshaUser user,
