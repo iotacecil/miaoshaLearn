@@ -5,7 +5,10 @@ import com.cloud.miaosha.domain.MiaoshaOrder;
 import com.cloud.miaosha.domain.MiaoshaUser;
 import com.cloud.miaosha.rabbitmq.MiaoshaMessage;
 import com.cloud.miaosha.rabbitmq.MiaoshaSender;
-import com.cloud.miaosha.redis.*;
+import com.cloud.miaosha.redis.GoodsKey;
+import com.cloud.miaosha.redis.MiaoshaKey;
+import com.cloud.miaosha.redis.OrderKey;
+import com.cloud.miaosha.redis.RedisService;
 import com.cloud.miaosha.result.CodeMsg;
 import com.cloud.miaosha.result.Result;
 import com.cloud.miaosha.service.GoodsService;
@@ -63,7 +66,7 @@ public class MiaoshaController implements InitializingBean{
 	public Result<Boolean> reset(Model model) {
 		List<GoodVo> goodsList = goodsService.listGoodsVo();
 		for(GoodVo goods : goodsList) {
-			goods.setStockCount(10);
+			goods.setStockCount(10000);
 			redisService.set(GoodsKey.getMiaoshaGoodsStock, ""+goods.getId(), 10);
 			localOverMap.put(goods.getId(), false);
 		}
@@ -115,6 +118,7 @@ public class MiaoshaController implements InitializingBean{
 		msg.setUser(user);
 		msg.setGoodsId(goodsId);
 		sender.sendMiaoshaMessage(msg);
+		System.out.println("下单MQ发送");
 		return Result.success(0);
 	}
 
@@ -134,15 +138,16 @@ public class MiaoshaController implements InitializingBean{
 			return Result.error(CodeMsg.SESSION_ERROR);
 		}
 		long rst = miaoshaService.getMiaoshaResult(user.getId(),goodsId);
+		System.out.println("用户" + user.getNickname() + "秒杀成功");
 		return Result.success(rst);
 	}
 
 	@AccessLimit(seconds = 5,maxCount = 5,needLogin = true)
 	@RequestMapping(value = "/path",method = RequestMethod.GET)
 	@ResponseBody
-	public Result<String> getMiaoShaPath(HttpServletRequest request,MiaoshaUser user,
+	public Result<String> getMiaoShaPath(HttpServletRequest request, MiaoshaUser user,
 										 @RequestParam("goodsId")long goodsId,
-										 @RequestParam(value = "verifyCode",required = false)int verify){
+										 @RequestParam(value = "verifyCode", required = false) Integer verify) {
 		if(user == null){
 			return Result.error(CodeMsg.SESSION_ERROR);
 		}
@@ -162,7 +167,8 @@ public class MiaoshaController implements InitializingBean{
 //			return Result.error(CodeMsg.ACCESS_LIMIT_REACHED);
 //		}
 		// 验证码
-		boolean check = miaoshaService.checkVerifyCode(user,goodsId,verify);
+//		boolean check = miaoshaService.checkVerifyCode(user,goodsId,verify);
+		boolean check = true;
 		if(!check){
 			return Result.error(CodeMsg.REQUEST_ILLEGAL);
 		}
@@ -175,6 +181,7 @@ public class MiaoshaController implements InitializingBean{
 	public Result<String> getVerifyCode(HttpServletResponse response,
 										MiaoshaUser user,
 										@RequestParam("goodsId")long goodsId){
+
 
 		if(user == null){
 			return Result.error(CodeMsg.SESSION_ERROR);

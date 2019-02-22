@@ -49,7 +49,7 @@ public class UserUtil {
 		conn.close();
 		System.out.println("insert to db");
 		//登录，生成token
-		String urlString = "http://localhost:8080/login/do_login";
+		String urlString = "http://localhost:8022/login/do_login";
 		File file = new File("D:/miaoshaLearn/tokens.txt");
 		if(file.exists()) {
 			file.delete();

@@ -70,7 +70,7 @@ public class AccessIntercepter extends HandlerInterceptorAdapter{
                return false;
            }
        }
-       return false;
+        return true;
     }
     private void render(HttpServletResponse response, CodeMsg cm)throws Exception {
         response.setContentType("application/json;charset=UTF-8");
