@@ -23,10 +23,11 @@ public class GoodsService {
         return goodsDao.getGoodsVoByGoodsId(goodsId);
     }
     // 减库存
-    public boolean reduceStock(GoodVo goods) {
+    public boolean reduceStock(GoodVo goods) throws InterruptedException {
         MiaoshaGoods g = new MiaoshaGoods();
         g.setGooddsId(goods.getId());
         int rst = goodsDao.reduceStock(g);
+        Thread.sleep(5000);
         System.out.println("dao层减少库存"+rst);
         return rst > 0;
     }

@@ -45,7 +45,12 @@ public class MiaoshaService {
     public OrderInfo miaosha(MiaoshaUser user, GoodVo goods) {
 
         //减库存 下订单 写入秒杀订单
-        boolean success = goodsService.reduceStock(goods);
+        boolean success = false;
+        try {
+            success = goodsService.reduceStock(goods);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         System.out.println("想要减少库存+:"+success);
         if(success){
             //order_info maiosha_order

@@ -53,9 +53,7 @@ public class GoodsController {
         // 取页面缓存
         String html = redisService.get(GoodsKey.getGoodsList, "", String.class);
         if(!StringUtils.isEmpty(html)) {
-            
             return html;
-
         }
         // 秒杀商品列表
         List<GoodVo> goodVos = goodsService.listGoodsVo();
@@ -70,6 +68,7 @@ public class GoodsController {
         if(!StringUtils.isEmpty(html)) {
             redisService.set(GoodsKey.getGoodsList, "", html);
         }
+
         return html;
     }
     @RequestMapping(value = "/detail/{goodsId}")

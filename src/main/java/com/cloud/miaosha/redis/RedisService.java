@@ -41,7 +41,7 @@ public class RedisService{
 			String str = beanToString(value);
 			if(str == null||str.length()<=0)return false;
 			String prefixKey = prefix.getPrefix()+key;
-			System.out.println(prefixKey);
+//			System.out.println(prefixKey);
 			int expire = prefix.expireSeconds();
 			//永不过期
 			if(expire<=0){
